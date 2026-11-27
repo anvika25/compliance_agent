@@ -154,8 +154,18 @@ Checks:
    Section 7: 8/8 evaluation cases pass.
    Design and tool definitions: `docs/EXAMINER_AGENT.md`.
 
+## 6. Governance — `08_governance`  *(Implemented where permitted; see docs/GOVERNANCE.md)*
+
+1. Optional but best: Settings → Identity and access → Groups → create `examiner_engineers`, `examiner_analysts`,
+   `examiner_reviewers`, `examiner_agent`, `examiner_pii_viewers`, `examiner_confidential_readers`,
+   `examiner_restricted_readers` (needs workspace admin). Without them, the tags, masks, view and retention still apply;
+   only GRANTs log as FAILED.
+2. Run all. Checks: section 3 shows `masked:xxxxxxxx` for names (unless you are in `examiner_pii_viewers`); section 4 shows
+   the secure view returning only what your groups allow; section 8 lists APPLIED/FAILED per purpose; the final cell lists
+   column tags.
+
 ## Not covered yet (next steps)
-Governance (ownership, tags, PII masks, grants, row filters), the two dashboards, Asset Bundle + CI/CD, remaining docs.
+The two dashboards, Asset Bundle + CI/CD, remaining docs.
 
 ## Known limitations of step 1
 * Dormant-account test uses current account status, not point-in-time status (would need SCD2 in production).
