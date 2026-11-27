@@ -27,7 +27,7 @@ targets:
     mode: development            # resources prefixed with [dev <user>], schedules paused automatically
     default: true
     workspace:
-      host: https://<your-dev-workspace>.cloud.databricks.com
+      host: https://dbc-d0da2f66-1c1d.cloud.databricks.com
 
   prod:
     mode: production
