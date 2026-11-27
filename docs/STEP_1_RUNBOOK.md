@@ -171,8 +171,13 @@ Checks:
 2. Build the two dashboards by following `docs/DASHBOARDS.md` (one dataset per view, chart types listed), then publish and
    screenshot them.
 
-## Not covered yet (next steps)
-Asset Bundle + CI/CD, remaining docs.
+## 8. Packaging — Asset Bundle, CI/CD, integration tests, docs  *(Implemented)*
+
+1. Run `10_integration_tests`: about 40 checks on the real tables; it fails loudly if any check fails.
+2. Optional: install the Databricks CLI, put your workspace URL in `databricks.yml` (dev target), then
+   `databricks bundle validate` → `databricks bundle deploy` → `databricks bundle run examiner_daily_pipeline`.
+3. Optional: push to GitHub; `.github/workflows/ci.yml` runs the 54 unit tests on every PR.
+4. Read `docs/INTERVIEW_CHECKLIST.md` and open each item before the interview.
 
 ## Known limitations of step 1
 * Dormant-account test uses current account status, not point-in-time status (would need SCD2 in production).
