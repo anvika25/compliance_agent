@@ -130,8 +130,20 @@ Checks:
 * `gold_examiner_summary`, `ACCESS_CONTROL` for October: 2 controls evaluated, 2 failed, EXC-10025 first in
   `high_risk_exceptions`, 1 overdue item, `human_review_status = PENDING_HUMAN_REVIEW`.
 
+## 4. Policy RAG — `06a_toy_rag` then `06_rag_policies`  *(Implemented)*
+
+1. **Practice:** `06a_toy_rag`. BM25 finds "privileged access recertified" but misses "re-check what admins can do";
+   embeddings find both; INTERNAL clearance gets NOT_FOUND for the confidential chunk.
+2. `06_rag_policies` with widgets: `retriever=vector_search`, `embedding_endpoint` = your embedding endpoint,
+   `llm_endpoint` = your chat endpoint (blank = quote-only answers). First run creates Vector Search endpoint `examiner_vs`
+   (5–15 min) and index `serving.policy_chunks_index`.
+3. Checks: 45 chunks from 7 documents; the 5 brief questions answered with `[POL-… v… §…]` citations; dress-code question
+   and INTERNAL-clearance privileged-access question return NOT_FOUND; `ml.rag_evaluation` has 8 rows per retriever;
+   `monitoring.rag_query_log` has one row per question. Local baseline (BM25 + extractive): 8/8 correct, citation accuracy
+   1.0, groundedness 1.0.
+
 ## Not covered yet (next steps)
-RAG, Examiner agent, governance tags
+Examiner agent, Examiner agent, governance tags
 and masks, dashboards, Asset Bundle/CI. `risk_score` is deliberately NULL until the scoring step.
 
 ## Known limitations of step 1
