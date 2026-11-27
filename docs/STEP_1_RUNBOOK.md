@@ -114,8 +114,24 @@ Expected ranking (approximate): **EXC-10025 ≈ 90 CRITICAL** (severity, overdue
 Bob initiator ≈ 63–66 HIGH > 72k self-approval, missing LCR ≈ 56–58 HIGH > structuring ≈ 53 MEDIUM > dormant ≈ 44 MEDIUM.
 See `docs/MODEL_CARD.md`.
 
+## 3. Gold data products — `05_gold_products`  *(Implemented)*
+
+1. Build history for trends: in `03_run_controls` set the widgets to `2026-08-01`/`2026-08-31` → Run all, then
+   `2026-09-01`/`2026-09-30` → Run all. Expected exceptions: August 2 (Alice SoD, DBA review), September 5
+   (+ Bob EA-0201 and EA-0202, + the 2026-08 suspicious-activity report variance), October about 14.
+2. Rerun `04_risk_scoring` with `retrain=false`, so September's new exceptions get scores.
+3. Run `05_gold_products` (a SQL notebook).
+
+Checks:
+* `gold_remediation_status`: ISS-3025 / EXC-10025 `is_overdue = true` (target 2026-10-31); ISS-3019 open but not overdue;
+  the other open exceptions appear as `EXCEPTION_WITHOUT_ISSUE` with an implied SLA target date.
+* `gold_compliance_dashboard`: 6 controls × 3 periods with `is_control_row = true`; `exception_count_change` populated
+  for September and October.
+* `gold_examiner_summary`, `ACCESS_CONTROL` for October: 2 controls evaluated, 2 failed, EXC-10025 first in
+  `high_risk_exceptions`, 1 overdue item, `human_review_status = PENDING_HUMAN_REVIEW`.
+
 ## Not covered yet (next steps)
-`gold_compliance_dashboard`, `gold_examiner_summary`, RAG, Examiner agent, governance tags
+RAG, Examiner agent, governance tags
 and masks, dashboards, Asset Bundle/CI. `risk_score` is deliberately NULL until the scoring step.
 
 ## Known limitations of step 1
