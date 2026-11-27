@@ -1,0 +1,43 @@
+# Databricks Asset Bundle for Examiner.
+#   databricks bundle validate -t dev
+#   databricks bundle deploy   -t dev
+#   databricks bundle run examiner_daily_pipeline -t dev
+bundle:
+  name: examiner_compliance
+
+include:
+  - resources/*.yml
+
+variables:
+  llm_endpoint:
+    description: Chat model used by RAG answers and agent recommendations
+    default: databricks-meta-llama-3-3-70b-instruct
+  embedding_endpoint:
+    description: Embedding model for the Vector Search index
+    default: databricks-gte-large-en
+  vs_endpoint:
+    description: Vector Search endpoint name
+    default: examiner_vs
+  alert_email:
+    description: Who is emailed when a job fails
+    default: compliance-platform@example.com
+
+targets:
+  dev:
+    mode: development            # resources prefixed with [dev <user>], schedules paused automatically
+    default: true
+    workspace:
+      host: https://<your-dev-workspace>.cloud.databricks.com
+
+  prod:
+    mode: production
+    workspace:
+      host: https://<your-prod-workspace>.cloud.databricks.com
+      root_path: /Workspace/Shared/.bundle/${bundle.name}/${bundle.target}
+    run_as:
+      service_principal_name: <examiner-prod-service-principal-application-id>
+    permissions:
+      - group_name: examiner_engineers
+        level: CAN_MANAGE
+      - group_name: examiner_reviewers
+        level: CAN_VIEW
