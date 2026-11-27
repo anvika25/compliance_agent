@@ -1,0 +1,81 @@
+resources:
+  jobs:
+
+    # ---------------------------------------------------------------- daily pipeline
+    examiner_daily_pipeline:
+      name: examiner-daily-pipeline
+      description: Bronze -> Silver -> controls (previous month) -> scoring -> Gold -> RAG refresh -> dashboards -> tests
+      schedule:
+        quartz_cron_expression: "0 30 6 * * ?"
+        timezone_id: America/Toronto
+      email_notifications:
+        on_failure: ["${var.alert_email}"]
+      max_concurrent_runs: 1
+      tasks:
+        - task_key: bronze
+          notebook_task: {notebook_path: ../notebooks/01_bronze.py}
+        - task_key: silver
+          depends_on: [{task_key: bronze}]
+          notebook_task: {notebook_path: ../notebooks/02_silver.py}
+        - task_key: run_controls
+          depends_on: [{task_key: silver}]
+          notebook_task: {notebook_path: ../notebooks/03_run_controls.py}   # widgets default to the previous month
+        - task_key: risk_scoring
+          depends_on: [{task_key: run_controls}]
+          notebook_task:
+            notebook_path: ../notebooks/04_risk_scoring.py
+            base_parameters: {retrain: "false"}                             # score with @champion only
+        - task_key: gold_products
+          depends_on: [{task_key: risk_scoring}]
+          notebook_task: {notebook_path: ../notebooks/05_gold_products.sql}
+        - task_key: rag_refresh
+          depends_on: [{task_key: silver}]                                  # independent of controls
+          notebook_task:
+            notebook_path: ../notebooks/06_rag_policies.py
+            base_parameters:
+              retriever: vector_search
+              embedding_endpoint: "${var.embedding_endpoint}"
+              llm_endpoint: "${var.llm_endpoint}"
+              vs_endpoint: "${var.vs_endpoint}"
+        - task_key: dashboard_views
+          depends_on: [{task_key: gold_products}, {task_key: rag_refresh}]
+          notebook_task: {notebook_path: ../notebooks/09_dashboard_views.py}
+        - task_key: integration_tests
+          depends_on: [{task_key: dashboard_views}]
+          notebook_task: {notebook_path: ../notebooks/10_integration_tests.py}
+
+    # ---------------------------------------------------------------- weekly agent regression
+    examiner_agent_eval:
+      name: examiner-agent-evaluation
+      description: Runs the brief's scenario plus refusal cases; results to ml.agent_evaluation and MLflow
+      schedule:
+        quartz_cron_expression: "0 0 7 ? * MON"
+        timezone_id: America/Toronto
+      email_notifications:
+        on_failure: ["${var.alert_email}"]
+      tasks:
+        - task_key: agent_eval
+          notebook_task:
+            notebook_path: ../notebooks/07_examiner_agent.py
+            base_parameters: {llm_endpoint: "${var.llm_endpoint}", vs_endpoint: "${var.vs_endpoint}"}
+
+    # ---------------------------------------------------------------- monthly model retrain
+    examiner_model_retrain:
+      name: examiner-risk-model-retrain
+      description: Retrains and registers the risk model; promotes to @champion only if it passes the gate
+      schedule:
+        quartz_cron_expression: "0 0 5 2 * ?"
+        timezone_id: America/Toronto
+      tasks:
+        - task_key: retrain
+          notebook_task:
+            notebook_path: ../notebooks/04_risk_scoring.py
+            base_parameters: {retrain: "true"}
+
+    # ---------------------------------------------------------------- dev-only bootstrap
+    examiner_bootstrap_synthetic_data:
+      name: examiner-bootstrap-synthetic-data
+      description: DEV ONLY. Regenerates synthetic raw files. Never deploy a schedule for this.
+      tasks:
+        - task_key: generate
+          notebook_task: {notebook_path: ../notebooks/00_generate_data.py}
