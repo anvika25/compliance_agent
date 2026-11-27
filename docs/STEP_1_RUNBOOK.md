@@ -142,9 +142,20 @@ Checks:
    `monitoring.rag_query_log` has one row per question. Local baseline (BM25 + extractive): 8/8 correct, citation accuracy
    1.0, groundedness 1.0.
 
+## 5. Examiner agent — `07a_toy_agent` then `07_examiner_agent`  *(Implemented)*
+
+1. **Practice:** `07a_toy_agent`. Llama picks `lookup_exception` / `count_overdue_remediation`, your code runs them;
+   "Close EXC-10025" can't change anything because no such tool exists.
+2. `07_examiner_agent` with defaults (`llm_endpoint = databricks-meta-llama-3-3-70b-instruct`, `retriever = vector_search`).
+   Section 5 prints the 11-section answer to the brief's scenario.
+3. Checks: EXC-10025 is the top high-risk exception with its evidence and "Bronze record verified present";
+   ISS-3025 shown OVERDUE; POL-ACC-002 §4.3/§4.1/§5.1 and POL-REM-005 §4/§6 cited; "Human Review Required: Yes";
+   no personal names. Section 6: all 6 bad requests REFUSED/INVALID_SCOPE with 0 tool calls.
+   Section 7: 8/8 evaluation cases pass.
+   Design and tool definitions: `docs/EXAMINER_AGENT.md`.
+
 ## Not covered yet (next steps)
-Examiner agent, Examiner agent, governance tags
-and masks, dashboards, Asset Bundle/CI. `risk_score` is deliberately NULL until the scoring step.
+Governance (ownership, tags, PII masks, grants, row filters), the two dashboards, Asset Bundle + CI/CD, remaining docs.
 
 ## Known limitations of step 1
 * Dormant-account test uses current account status, not point-in-time status (would need SCD2 in production).
