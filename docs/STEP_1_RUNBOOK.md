@@ -164,8 +164,15 @@ Checks:
    the secure view returning only what your groups allow; section 8 lists APPLIED/FAILED per purpose; the final cell lists
    column tags.
 
+## 7. Dashboards — `09_dashboard_views` + AI/BI dashboards  *(Implemented)*
+
+1. Run `09_dashboard_views`: creates 8 `gold.v_dash_*` and 10 `monitoring.v_plat_*` views and copies MLflow metrics into
+   `ml.platform_model_metrics`. The last two cells show both KPI rows.
+2. Build the two dashboards by following `docs/DASHBOARDS.md` (one dataset per view, chart types listed), then publish and
+   screenshot them.
+
 ## Not covered yet (next steps)
-The two dashboards, Asset Bundle + CI/CD, remaining docs.
+Asset Bundle + CI/CD, remaining docs.
 
 ## Known limitations of step 1
 * Dormant-account test uses current account status, not point-in-time status (would need SCD2 in production).
